@@ -5,7 +5,6 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -15,18 +14,18 @@ import java.util.Set;
 @Builder
 @ToString
 @Entity
-@Table(name = "recipe")
-public class Recipe {
+@Table(name = "temporary_recipe")
+public class TemporaryRecipe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
     @Column(name = "text", nullable = false)
     private String text;
+
+    @Column(name = "name")
+    private String name;
 
     @OneToMany(fetch = FetchType.EAGER)
     private List<Ingredient> ingredients;
@@ -41,16 +40,21 @@ public class Recipe {
             inverseJoinColumns = @JoinColumn(name = "users_id"))
     private Set<User> usersRated;
 
-    @Column(name = "rate", nullable = false)
+    @Column(name = "rate")
     private Integer rate;
 
-    @Column(name = "time", nullable = false)
+    @Column(name = "time")
     private Integer time;
 
     @Column(name = "category")
     @Enumerated(EnumType.STRING)
     private RecipeCategory recipeCategory;
 
-    @Column(name = "total_energy", nullable = false)
+    @Column(name = "total_energy")
     private BigDecimal totalEnergy;
+
+    public void addIngredient(final Ingredient ingredient){
+        ingredients.add(ingredient);
+    }
+
 }

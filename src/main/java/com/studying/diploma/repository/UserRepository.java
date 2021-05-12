@@ -1,13 +1,17 @@
 package com.studying.diploma.repository;
 
 
-import com.studying.diploma.model.Recipe;
+import com.studying.diploma.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 
 @Repository
-public interface UserRepository extends JpaRepository<Recipe, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
 }
 
 

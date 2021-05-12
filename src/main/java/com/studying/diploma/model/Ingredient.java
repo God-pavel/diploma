@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @ToString
 @Entity
-@Table(name = "ingridient")
+@Table(name = "ingredient")
 
 public class Ingredient {
     @Id
@@ -24,11 +24,5 @@ public class Ingredient {
     private Product product;
 
     @Column(name = "weight")
-    private Long total;
-
-    @Column(name = "amount")
-    private BigDecimal amount;
-
-    @Column(name = "is_weighed", nullable = false)
-    private boolean isWeighed;
+    private Long weight;
 }
