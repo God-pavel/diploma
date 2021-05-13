@@ -2,6 +2,7 @@ package com.studying.diploma.service;
 
 import com.studying.diploma.model.*;
 import com.studying.diploma.repository.IngredientRepository;
+import com.studying.diploma.repository.MarkRepository;
 import com.studying.diploma.repository.RecipeRepository;
 import com.studying.diploma.repository.TemporaryRecipeRepository;
 import lombok.extern.log4j.Log4j2;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -24,13 +24,15 @@ public class RecipeService {
     private final TemporaryRecipeRepository temporaryRecipeRepository;
     private final ProductService productService;
     private final IngredientRepository ingredientRepository;
+    private final MarkRepository markRepository;
 
 
-    public RecipeService(RecipeRepository recipeRepository, TemporaryRecipeRepository temporaryRecipeRepository, ProductService productService, IngredientRepository ingredientRepository) {
+    public RecipeService(RecipeRepository recipeRepository, TemporaryRecipeRepository temporaryRecipeRepository, ProductService productService, IngredientRepository ingredientRepository, MarkRepository markRepository) {
         this.recipeRepository = recipeRepository;
         this.temporaryRecipeRepository = temporaryRecipeRepository;
         this.productService = productService;
         this.ingredientRepository = ingredientRepository;
+        this.markRepository = markRepository;
     }
 
     public Page<Recipe> getAllRecipes(Pageable pageable) {
@@ -68,14 +70,14 @@ public class RecipeService {
         final TemporaryRecipe temporaryRecipe = getTemporaryRecipeById(recipeId);
         temporaryRecipeRepository.delete(temporaryRecipe);
         final Recipe recipe = Recipe.builder()
-                .rate(0)
+                .rate(0d)
                 .text(text)
                 .creator(user)
                 .recipeCategory(RecipeCategory.valueOf(category))
                 .ingredients(temporaryRecipe.getIngredients())
                 .name(name)
                 .time(time)
-                .usersRated(Set.of())
+//                .usersRated(Set.of())
                 //Todo calc
                 .totalEnergy(BigDecimal.ZERO)
                 .build();
@@ -111,17 +113,14 @@ public class RecipeService {
     public boolean rateRecipe(final Recipe recipe,
                               final Integer rate,
                               final User user) {
-        if (recipe.getUsersRated().contains(user)) {
+        if (recipe.getMarks().stream().map(m -> m.getUser().getId()).anyMatch(id -> id.equals(user.getId()))) {
             return false;
         }
-        recipe.getUsersRated().add(user);
-        recipe.setRate(calculateRate(recipe, rate));
+        final Mark mark = Mark.builder().mark(rate).user(user).recipe(recipe).build();
+        markRepository.save(mark);
+        recipe.getMarks().add(mark);
+        recipe.calculateRate();
         recipeRepository.save(recipe);
         return true;
-    }
-
-    private int calculateRate(final Recipe recipe,
-                              final Integer rate) {
-        return (recipe.getRate() * (recipe.getUsersRated().size() - 1) + rate) / recipe.getUsersRated().size();
     }
 }

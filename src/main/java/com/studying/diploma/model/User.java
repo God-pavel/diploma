@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,7 +19,7 @@ import java.util.Set;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long id;
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -32,6 +33,8 @@ public class User implements UserDetails {
     private boolean active;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     private Set<Role> roles;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Mark> marks;
 
     public boolean isAdmin() {
         return roles.contains(Role.ADMIN);

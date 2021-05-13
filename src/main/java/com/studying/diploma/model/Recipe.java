@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Data
@@ -19,7 +22,7 @@ import java.util.Set;
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
+    @Column(name = "recipe_id", nullable = false)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -31,18 +34,14 @@ public class Recipe {
     @OneToMany(fetch = FetchType.EAGER)
     private List<Ingredient> ingredients;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipe")
+    private List<Mark> marks;
+
     @ManyToOne(fetch = FetchType.EAGER)
     private User creator;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinTable(
-            name = "users_rated",
-            joinColumns = @JoinColumn(name = "recipies_id"),
-            inverseJoinColumns = @JoinColumn(name = "users_id"))
-    private Set<User> usersRated;
-
     @Column(name = "rate", nullable = false)
-    private Integer rate;
+    private Double rate;
 
     @Column(name = "time", nullable = false)
     private Integer time;
@@ -53,4 +52,10 @@ public class Recipe {
 
     @Column(name = "total_energy", nullable = false)
     private BigDecimal totalEnergy;
+
+    public void calculateRate(){
+        rate = marks.stream()
+                .mapToInt(Mark::getMark)
+                .average().orElse(0d);
+    }
 }
