@@ -53,12 +53,9 @@ public class RecipeService {
         return temporaryRecipeRepository.findById(id).get();
     }
 
-    public TemporaryRecipe createEmptyRecipe(User user) {
+    public TemporaryRecipe createEmptyRecipe() {
         return temporaryRecipeRepository.save(TemporaryRecipe.builder()
-                .creator(user)
                 .text("")
-                .rate(0)
-                .totalEnergy(BigDecimal.ZERO)
                 .build());
     }
 
@@ -66,13 +63,14 @@ public class RecipeService {
                            final Integer time,
                            final String name,
                            final String text,
-                           final String category) {
+                           final String category,
+                           final User user) {
         final TemporaryRecipe temporaryRecipe = getTemporaryRecipeById(recipeId);
         temporaryRecipeRepository.delete(temporaryRecipe);
         final Recipe recipe = Recipe.builder()
                 .rate(0)
                 .text(text)
-                .creator(temporaryRecipe.getCreator())
+                .creator(user)
                 .recipeCategory(RecipeCategory.valueOf(category))
                 .ingredients(temporaryRecipe.getIngredients())
                 .name(name)
@@ -108,5 +106,22 @@ public class RecipeService {
                 .filter(recipe -> products == null || recipe.getIngredients().stream().map(ingredient -> ingredient.getProduct().getName()).collect(Collectors.toList()).containsAll(products))
                 .collect(Collectors.toList())
         );
+    }
+
+    public boolean rateRecipe(final Recipe recipe,
+                              final Integer rate,
+                              final User user) {
+        if (recipe.getUsersRated().contains(user)) {
+            return false;
+        }
+        recipe.getUsersRated().add(user);
+        recipe.setRate(calculateRate(recipe, rate));
+        recipeRepository.save(recipe);
+        return true;
+    }
+
+    private int calculateRate(final Recipe recipe,
+                              final Integer rate) {
+        return (recipe.getRate() * (recipe.getUsersRated().size() - 1) + rate) / recipe.getUsersRated().size();
     }
 }

@@ -27,8 +27,8 @@ public class CreateRecipeController {
     }
 
     @GetMapping
-    public String showRecipe(@AuthenticationPrincipal User user, Model model) {
-        TemporaryRecipe recipe = recipeService.createEmptyRecipe(user);
+    public String showRecipe(Model model) {
+        TemporaryRecipe recipe = recipeService.createEmptyRecipe();
         model.addAttribute("recipe", recipe);
         model.addAttribute("categories", RecipeCategory.values());
         model.addAttribute("products", productService.getAllProducts());
@@ -50,11 +50,12 @@ public class CreateRecipeController {
 
     @PostMapping("{recipeId}")
     public String saveRecipe(@PathVariable Long recipeId,
+                             @AuthenticationPrincipal User user,
                              @RequestParam("time") Integer time,
                              @RequestParam("name") String name,
                              @RequestParam("text") String text,
                              @RequestParam("category") String category) {
-        recipeService.saveRecipe(recipeId, time, name, text, category);
+        recipeService.saveRecipe(recipeId, time, name, text, category, user);
 
         return "redirect:/main";
     }
@@ -62,8 +63,7 @@ public class CreateRecipeController {
     @PostMapping("/addIngredient/{recipeId}")
     public String addByName(@PathVariable Long recipeId,
                             @RequestParam("productName") String productName,
-                            @RequestParam("weight") Long weight,
-                            RedirectAttributes ra) {
+                            @RequestParam("weight") Long weight) {
 
         recipeService.addIngredientToRecipe(recipeId, productName, weight);
 

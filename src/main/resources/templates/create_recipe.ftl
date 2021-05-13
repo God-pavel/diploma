@@ -52,7 +52,6 @@
         <label class="col-sm-2 col-form-label"><@spring.message "recipe.text"/> : </label>
         <p><textarea name="text" rows="4" cols="70" required> </textarea></p>
 
-        <p><@spring.message "main.creator"/> : ${recipe.creator.username}</p>
         <#if recipe.ingredients??>
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label"> <@spring.message "recipe.ingredients"/> : </label>
@@ -63,8 +62,6 @@
                 </div>
             </div>
         </#if>
-        <p><@spring.message "main.total"/> : ${recipe.totalEnergy}</p>
-        <p><@spring.message "main.rate"/> : ${recipe.rate}</p>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label"> <@spring.message "criteria.category"/></label>
             <div class="col-sm-4">

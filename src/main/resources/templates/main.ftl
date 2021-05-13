@@ -7,22 +7,22 @@
     <#if message != "">
         <div class="alert alert-danger" role="alert">${message}</div>
     </#if>
-        <div class="row">
-            <div class="col-sm-2">
-                <form action="/main/findRecipe" method="post">
-                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                    <button class="btn btn-primary" type="submit"><@spring.message "main.find.recipe"/></button>
-                </form>
-            </div>
-            <div class="col-sm-2">
-                <#if name != "unknown">
-                    <form action="/main/createRecipe" method="post">
-                        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                        <button class="btn btn-primary" type="submit"><@spring.message "main.create.recipe"/></button>
-                    </form>
-                </#if>
-            </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <form action="/main/findRecipe" method="post">
+                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                <button class="btn btn-primary" type="submit"><@spring.message "main.find.recipe"/></button>
+            </form>
         </div>
+        <div class="col-sm-2">
+            <#if name != "unknown">
+                <form action="/main/createRecipe" method="post">
+                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                    <button class="btn btn-primary" type="submit"><@spring.message "main.create.recipe"/></button>
+                </form>
+            </#if>
+        </div>
+    </div>
 
     <@p.pager url page/>
 
@@ -40,15 +40,8 @@
                 </#list>
 
                 <div class="card-footer text-muted">
-                    <b style="float: left;"><@spring.message "main.total"/> : ${recipe.totalEnergy}</b>
-                    <#--                    <#if isSeniorCashier>-->
-                    <#--                        <form action="/main/deleteCheck" method="post">-->
-                    <#--                            <input type="hidden" name="_csrf" value="${_csrf.token}"/>-->
-                    <#--                            <input type="hidden" name="checkId" value="${check.id}"/>-->
-                    <#--                            <button type="submit"-->
-                    <#--                                    class="btn ml-4 btn-secondary"><@spring.message "main.deleteCheck"/></button>-->
-                    <#--                        </form>-->
-                    <#--                    </#if>-->
+                    <p><b style="float: left;"><@spring.message "main.total"/> : ${recipe.totalEnergy}</b></p>
+                    <p><a style="float: left;" href="/rateRecipe/${recipe.id}"><@spring.message "main.more"/></a></p>
                 </div>
             </div>
         </#list>

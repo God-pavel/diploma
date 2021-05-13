@@ -30,28 +30,12 @@ public class TemporaryRecipe {
     @OneToMany(fetch = FetchType.EAGER)
     private List<Ingredient> ingredients;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private User creator;
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinTable(
-            name = "users_rated",
-            joinColumns = @JoinColumn(name = "recipies_id"),
-            inverseJoinColumns = @JoinColumn(name = "users_id"))
-    private Set<User> usersRated;
-
-    @Column(name = "rate")
-    private Integer rate;
-
     @Column(name = "time")
     private Integer time;
 
     @Column(name = "category")
     @Enumerated(EnumType.STRING)
     private RecipeCategory recipeCategory;
-
-    @Column(name = "total_energy")
-    private BigDecimal totalEnergy;
 
     public void addIngredient(final Ingredient ingredient){
         ingredients.add(ingredient);
