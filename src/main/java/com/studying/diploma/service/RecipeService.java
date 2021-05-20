@@ -13,24 +13,31 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Log4j2
 @Service
 public class RecipeService {
 
+    public static final Integer MIN_COMMON_MARKS = 5;
+    public static final Integer MAX_AVG_MARKS_DIFFERENCE = 2;
+    public static final Integer SIMILAR_USERS = 3;
+    public static final Integer MIN_RECOMMENDATION_MARK = 9;
+
+
+    private final ProductService productService;
+    private final UserService userService;
     private final RecipeRepository recipeRepository;
     private final TemporaryRecipeRepository temporaryRecipeRepository;
-    private final ProductService productService;
     private final IngredientRepository ingredientRepository;
     private final MarkRepository markRepository;
 
 
-    public RecipeService(RecipeRepository recipeRepository, TemporaryRecipeRepository temporaryRecipeRepository, ProductService productService, IngredientRepository ingredientRepository, MarkRepository markRepository) {
+    public RecipeService(RecipeRepository recipeRepository, TemporaryRecipeRepository temporaryRecipeRepository, ProductService productService, UserService userService, IngredientRepository ingredientRepository, MarkRepository markRepository) {
         this.recipeRepository = recipeRepository;
         this.temporaryRecipeRepository = temporaryRecipeRepository;
         this.productService = productService;
+        this.userService = userService;
         this.ingredientRepository = ingredientRepository;
         this.markRepository = markRepository;
     }
@@ -38,16 +45,6 @@ public class RecipeService {
     public Page<Recipe> getAllRecipes(Pageable pageable) {
 
         return recipeRepository.findAll(pageable);
-    }
-
-    public List<Recipe> getAllRecipes() {
-
-        return recipeRepository.findAll();
-    }
-
-    public Optional<Recipe> getRecipeById(long id) {
-
-        return recipeRepository.findById(id);
     }
 
     public TemporaryRecipe getTemporaryRecipeById(long id) {
@@ -77,9 +74,7 @@ public class RecipeService {
                 .ingredients(temporaryRecipe.getIngredients())
                 .name(name)
                 .time(time)
-//                .usersRated(Set.of())
-                //Todo calc
-                .totalEnergy(BigDecimal.ZERO)
+                .totalEnergy(calculateRecipeEnergy(temporaryRecipe.getIngredients()))
                 .build();
         recipeRepository.save(recipe);
         log.info("Check was saved. Check id: " + recipe.getId());
@@ -110,6 +105,7 @@ public class RecipeService {
         );
     }
 
+
     public boolean rateRecipe(final Recipe recipe,
                               final Integer rate,
                               final User user) {
@@ -122,5 +118,28 @@ public class RecipeService {
         recipe.calculateRate();
         recipeRepository.save(recipe);
         return true;
+    }
+
+    public Page<Recipe> getUserRecommendations(final User user) {
+        return new PageImpl<>(userService.getSimilarUsers(user).stream()
+                .flatMap(similarUser -> similarUser.getMarks().stream())
+                .filter(mark -> mark.getMark() >= MIN_RECOMMENDATION_MARK)
+                .map(Mark::getRecipe)
+                .filter(recipe -> filterPreviouslyRatedRecipes(user, recipe))
+                .distinct()
+                .collect(Collectors.toList()));
+    }
+
+    private boolean filterPreviouslyRatedRecipes(User user, Recipe recipe) {
+        return userService.getUserById(user.getId()).getMarks()
+                .stream()
+                .map(Mark::getRecipe)
+                .noneMatch(recipe1 -> recipe1.equals(recipe));
+    }
+
+    private BigDecimal calculateRecipeEnergy(List<Ingredient> ingredients) {
+        return ingredients.stream()
+                .map(ingredient -> ingredient.getProduct().getEnergy().multiply(BigDecimal.valueOf(ingredient.getWeight()).divide(BigDecimal.valueOf(100))))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -49,9 +49,6 @@
                 <input type="number" class="form-control" name="time" required/>
             </div>
         </div>
-        <label class="col-sm-2 col-form-label"><@spring.message "recipe.text"/> : </label>
-        <p><textarea name="text" rows="4" cols="70" required> </textarea></p>
-
         <#if recipe.ingredients??>
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label"> <@spring.message "recipe.ingredients"/> : </label>
@@ -62,6 +59,8 @@
                 </div>
             </div>
         </#if>
+        <label class="col-sm-2 col-form-label"><@spring.message "recipe.text"/> : </label>
+        <p><textarea name="text" rows="4" cols="70" required> </textarea></p>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label"> <@spring.message "criteria.category"/></label>
             <div class="col-sm-4">

@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "/registration").permitAll()
                 .antMatchers("/users", "/products").hasAuthority("ADMIN")
-                .antMatchers("/profile", "/createRecipe").fullyAuthenticated()
+                .antMatchers("/profile", "/createRecipe", "/recommendation").fullyAuthenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")

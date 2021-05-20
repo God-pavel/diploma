@@ -1,6 +1,7 @@
 package com.studying.diploma.service;
 
 import com.studying.diploma.dto.UserDTO;
+import com.studying.diploma.model.Mark;
 import com.studying.diploma.model.Role;
 import com.studying.diploma.model.User;
 import com.studying.diploma.repository.UserRepository;
@@ -15,6 +16,8 @@ import javax.annotation.PostConstruct;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.studying.diploma.service.RecipeService.*;
 
 @Log4j2
 @Service
@@ -92,6 +95,39 @@ public class UserService implements UserDetailsService {
 
         userRepository.save(user);
         return true;
+    }
+
+    public User getUserById(final Long id){
+        return userRepository.findById(id).get();
+    }
+
+    public Set<User> getSimilarUsers(final User user) {
+        return
+//                false ?
+                userRepository.findAll().stream()
+                .filter(candidate -> areUsersSimilar(user, candidate))
+                .limit(SIMILAR_USERS)
+                .collect(Collectors.toSet());
+//                : userRepository.findAll().stream().limit(3).collect(Collectors.toSet());
+    }
+
+    //Todo optimize
+    public boolean areUsersSimilar(final User user1,
+                                   final User user2) {
+        final Map<Mark, Mark> commonMarks = getCommonMarks(getUserById(user1.getId()).getMarks(), getUserById(user2.getId()).getMarks());
+        if (commonMarks.size() < MIN_COMMON_MARKS || user1.getId().equals(user2.getId())) {
+            return false;
+        }
+        return commonMarks.entrySet().stream()
+                .mapToInt(entry -> Math.abs(entry.getKey().getMark() - entry.getValue().getMark()))
+                .average().orElse(10d) <= MAX_AVG_MARKS_DIFFERENCE;
+    }
+
+    public Map<Mark, Mark> getCommonMarks(final List<Mark> marks1,
+                                          final List<Mark> marks2) {
+        return marks1.stream()
+                .filter(mark1 -> marks2.stream().anyMatch(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())))
+                .collect(Collectors.toMap(mark1 -> mark1, mark1 -> (Mark) marks2.stream().filter(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())).findFirst().get()));
     }
 
     @PostConstruct

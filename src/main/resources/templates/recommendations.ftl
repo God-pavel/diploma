@@ -3,27 +3,7 @@
 <#import "parts/pager.ftl" as p>
 <#include "parts/security.ftl">
 <@c.page>
-    <h3><@spring.message "page.main"/></h3>
-    <#if message != "">
-        <div class="alert alert-danger" role="alert">${message}</div>
-    </#if>
-    <div class="row">
-        <div class="col-sm-2">
-            <form action="/main/findRecipe" method="post">
-                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                <button class="btn btn-primary" type="submit"><@spring.message "main.find.recipe"/></button>
-            </form>
-        </div>
-        <div class="col-sm-2">
-            <#if name != "unknown">
-                <form action="/main/createRecipe" method="post">
-                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                    <button class="btn btn-primary" type="submit"><@spring.message "main.create.recipe"/></button>
-                </form>
-            </#if>
-        </div>
-    </div>
-
+    <h3><@spring.message "page.recommendations"/></h3>
     <@p.pager url page/>
 
     <div class="card-columns">

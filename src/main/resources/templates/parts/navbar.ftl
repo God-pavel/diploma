@@ -13,6 +13,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="/main"><@spring.message "navbar.main"/></a>
             </li>
+            <#if name != "unknown">
+                <li class="nav-item">
+                    <a class="nav-link" href="/recommendation"><@spring.message "navbar.recommendation"/></a>
+                </li>
+            </#if>
             <#if isAdmin>
                 <li class="nav-item">
                     <a class="nav-link" href="/users"><@spring.message "navbar.users"/></a>
