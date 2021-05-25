@@ -28,7 +28,7 @@ public class Recipe {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "text", nullable = false)
+    @Column(name = "text", nullable = false, length = 1000)
     private String text;
 
     @OneToMany(fetch = FetchType.EAGER)

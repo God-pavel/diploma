@@ -97,7 +97,7 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
-    public User getUserById(final Long id){
+    public User getUserById(final Long id) {
         return userRepository.findById(id).get();
     }
 
@@ -105,9 +105,9 @@ public class UserService implements UserDetailsService {
         return
 //                false ?
                 userRepository.findAll().stream()
-                .filter(candidate -> areUsersSimilar(user, candidate))
-                .limit(SIMILAR_USERS)
-                .collect(Collectors.toSet());
+                        .filter(candidate -> areUsersSimilar(user, candidate))
+                        .limit(SIMILAR_USERS)
+                        .collect(Collectors.toSet());
 //                : userRepository.findAll().stream().limit(3).collect(Collectors.toSet());
     }
 

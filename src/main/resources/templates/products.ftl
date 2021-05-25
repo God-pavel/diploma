@@ -22,7 +22,7 @@
                     <tr>
                         <td>${product.id}</td>
                         <td>${product.name}</td>
-                        <td>${product.energy} <@spring.message "product.сal"/></td>
+                        <td>${product.energy} <@spring.message "product.cal"/></td>
                         <td><a href="/products/${product.id}"><@spring.message "users.edit"/></a></td>
                     </tr>
                 </#list>
