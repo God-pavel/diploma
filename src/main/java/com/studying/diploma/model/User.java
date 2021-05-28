@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static com.studying.diploma.config.MvcConfig.PHOTO_FOLDER;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,10 +34,19 @@ public class User implements UserDetails {
     private String surname;
     @Column(name = "active", nullable = false)
     private boolean active;
+    @Column(name = "photo")
+    private String photo;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     private Set<Role> roles;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<Mark> marks;
+
+    @Transient
+    public String getPhotosImagePath() {
+        if (photo == null || id == null) return null;
+
+        return "/" + PHOTO_FOLDER + id + "/" + photo;
+    }
 
     public boolean isAdmin() {
         return roles.contains(Role.ADMIN);

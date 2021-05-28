@@ -11,12 +11,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.studying.diploma.config.MvcConfig.PHOTO_FOLDER;
 import static com.studying.diploma.service.RecipeService.*;
 
 @Log4j2
@@ -25,10 +28,12 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileUploadUtil fileUploadUtil;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, FileUploadUtil fileUploadUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.fileUploadUtil = fileUploadUtil;
     }
 
 
@@ -84,16 +89,31 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean userEdit(final User user,
-                            final UserDTO userDTO) {
+                            final UserDTO userDTO,
+                            final MultipartFile multipartFile) {
         if (!user.getUsername().equals(userDTO.getUsername()) && userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
             log.warn("email not unique!");
             return false;
         }
+
+        if (multipartFile.getOriginalFilename() != null && !StringUtils.cleanPath(multipartFile.getOriginalFilename()).equals("")) {
+            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            user.setPhoto(fileName);
+            String uploadDir = PHOTO_FOLDER + user.getId();
+            try {
+//                fileUploadUtil.saveFileToS3(uploadDir, fileName, multipartFile);
+                fileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+            } catch (Exception e) {
+                log.warn("File " + fileName + " can't be saved!");
+            }
+        }
+
         user.setName(userDTO.getName());
         user.setSurname(userDTO.getSurname());
         user.setUsername(userDTO.getUsername());
 
         userRepository.save(user);
+
         return true;
     }
 
@@ -102,13 +122,10 @@ public class UserService implements UserDetailsService {
     }
 
     public Set<User> getSimilarUsers(final User user) {
-        return
-//                false ?
-                userRepository.findAll().stream()
-                        .filter(candidate -> areUsersSimilar(user, candidate))
-                        .limit(SIMILAR_USERS)
-                        .collect(Collectors.toSet());
-//                : userRepository.findAll().stream().limit(3).collect(Collectors.toSet());
+        return userRepository.findAll().stream()
+                .filter(candidate -> areUsersSimilar(user, candidate))
+                .limit(SIMILAR_USERS)
+                .collect(Collectors.toSet());
     }
 
     //Todo optimize

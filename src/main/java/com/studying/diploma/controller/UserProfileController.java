@@ -8,10 +8,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/profile")
@@ -33,16 +32,18 @@ public class UserProfileController {
     }
 
     @GetMapping("{user}/edit")
-    public String adminEditPage(@PathVariable User user, Model model) {
+    public String adminEditPage(@PathVariable User user,
+                                Model model) {
         model.addAttribute("user", user);
         return "profile_edit";
     }
 
     @PostMapping("{user}/edit")
     public String profileEdit(@PathVariable User user,
+                              @RequestParam("image") MultipartFile multipartFile,
                               Model model,
                               UserDTO userdto) {
-        if (!userService.userEdit(user, userdto)) {
+        if (!userService.userEdit(user, userdto, multipartFile)) {
             model.addAttribute("message", messageSource.getMessage("message.exist.user", null, LocaleContextHolder.getLocale()));
             return "profile_edit";
         }

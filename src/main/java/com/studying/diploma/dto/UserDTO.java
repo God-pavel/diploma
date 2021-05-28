@@ -17,4 +17,5 @@ public class UserDTO {
     private Set<Role> roles;
     private String name;
     private String surname;
+    private String photo;
 }
