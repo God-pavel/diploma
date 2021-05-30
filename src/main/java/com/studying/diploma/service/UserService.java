@@ -29,11 +29,13 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileUploadUtil fileUploadUtil;
+    private final AmazonClient amazonClient;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, FileUploadUtil fileUploadUtil) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, FileUploadUtil fileUploadUtil, AmazonClient amazonClient) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.fileUploadUtil = fileUploadUtil;
+        this.amazonClient = amazonClient;
     }
 
 
@@ -97,12 +99,12 @@ public class UserService implements UserDetailsService {
         }
 
         if (multipartFile.getOriginalFilename() != null && !StringUtils.cleanPath(multipartFile.getOriginalFilename()).equals("")) {
-            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            String fileName = generateFileName(multipartFile);
             user.setPhoto(fileName);
             String uploadDir = PHOTO_FOLDER + user.getId();
             try {
-//                fileUploadUtil.saveFileToS3(uploadDir, fileName, multipartFile);
-                fileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+                amazonClient.uploadFile(multipartFile, uploadDir +"/" + fileName);
+//                fileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
             } catch (Exception e) {
                 log.warn("File " + fileName + " can't be saved!");
             }
@@ -161,5 +163,9 @@ public class UserService implements UserDetailsService {
             userRepository.save(user);
         }
 
+    }
+
+    private String generateFileName(MultipartFile multiPart) {
+        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
     }
 }

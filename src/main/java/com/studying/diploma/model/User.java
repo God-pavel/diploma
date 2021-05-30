@@ -44,8 +44,7 @@ public class User implements UserDetails {
     @Transient
     public String getPhotosImagePath() {
         if (photo == null || id == null) return null;
-
-        return "/" + PHOTO_FOLDER + id + "/" + photo;
+        return "https://diploma-files.s3.amazonaws.com/"+ PHOTO_FOLDER + id + "/" + photo;
     }
 
     public boolean isAdmin() {
