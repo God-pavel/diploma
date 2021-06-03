@@ -4,6 +4,9 @@
 
 <@c.page>
     <h3><@spring.message "page.fastFind"/></h3>
+    <#if error??>
+        <div class="alert alert-danger" role="alert"><@spring.message "recipe.error.noing"/></div>
+    </#if>
 
     <div>
         <form action="/fastFindRecipe/addIngredient/${recipe.id}" method="post">

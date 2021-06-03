@@ -1,9 +1,6 @@
 package com.studying.diploma.controller;
 
-import com.studying.diploma.model.Recipe;
-import com.studying.diploma.model.RecipeCategory;
-import com.studying.diploma.model.TemporaryRecipe;
-import com.studying.diploma.model.User;
+import com.studying.diploma.model.*;
 import com.studying.diploma.service.ProductService;
 import com.studying.diploma.service.RecipeService;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +30,7 @@ public class RecipeController {
     public String criteriaPage(Model model) {
         model.addAttribute("categories", RecipeCategory.values());
         model.addAttribute("products", productService.getAllProducts());
+        model.addAttribute("path", "");
         return "criteria";
     }
 
@@ -97,6 +95,11 @@ public class RecipeController {
     public String send(@PathVariable Long recipeId,
                        @RequestParam(value = "time", required = false) Integer time,
                        RedirectAttributes ra){
+        List<Ingredient> ingredients = recipeService.getIngredients(recipeId);
+        if(ingredients.isEmpty()){
+            ra.addFlashAttribute("error", "error");
+            return "redirect:/fastFindRecipe/" + recipeId;
+        }
         Page<Recipe> result = recipeService.findRecipesByIngredientsAndTime(recipeId, time);
         ra.addFlashAttribute("recipes", result);
         return "redirect:/main";

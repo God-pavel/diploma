@@ -5,7 +5,7 @@
 <@c.page>
     <h3>${recipe.name}</h3>
     <#if message?? && message == "error">
-        <div class="alert alert-danger" role="alert"><@spring.message "recipe.error"/></div>
+        <div class="alert alert-danger" role="alert"><@spring.message "recipe.error.rate"/></div>
     </#if>
     <p><@spring.message "recipe.time"/> : ${recipe.time}</p>
     <p><@spring.message "main.category"/> : ${recipe.recipeCategory}</p>

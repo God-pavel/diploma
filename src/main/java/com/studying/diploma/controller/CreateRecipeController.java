@@ -6,6 +6,7 @@ import com.studying.diploma.model.User;
 import com.studying.diploma.service.ProductService;
 import com.studying.diploma.service.RecipeService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,9 +55,12 @@ public class CreateRecipeController {
                              @RequestParam("time") Integer time,
                              @RequestParam("name") String name,
                              @RequestParam("text") String text,
-                             @RequestParam("category") String category) {
-        recipeService.saveRecipe(recipeId, time, name, text, category, user);
-
+                             @RequestParam("category") String category,
+                             RedirectAttributes ra) {
+        if (!recipeService.saveRecipe(recipeId, time, name, text, category, user)) {
+            ra.addFlashAttribute("error", "error");
+            return "redirect:/createRecipe/" + recipeId;
+        }
         return "redirect:/main";
     }
 

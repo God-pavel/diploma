@@ -59,13 +59,17 @@ public class RecipeService {
                 .build());
     }
 
-    public void saveRecipe(final Long recipeId,
-                           final Integer time,
-                           final String name,
-                           final String text,
-                           final String category,
-                           final User user) {
+    public boolean saveRecipe(final Long recipeId,
+                              final Integer time,
+                              final String name,
+                              final String text,
+                              final String category,
+                              final User user) {
+
         final TemporaryRecipe temporaryRecipe = getTemporaryRecipeById(recipeId);
+        if (temporaryRecipe.getIngredients().isEmpty()) {
+            return false;
+        }
         temporaryRecipeRepository.delete(temporaryRecipe);
         final Recipe recipe = Recipe.builder()
                 .rate(0d)
@@ -79,6 +83,7 @@ public class RecipeService {
                 .build();
         recipeRepository.save(recipe);
         log.info("Check was saved. Check id: " + recipe.getId());
+        return true;
     }
 
     public void addIngredientToRecipe(final Long recipeId,
@@ -105,6 +110,10 @@ public class RecipeService {
                 .filter(recipe -> doesEnoughIngredientsForTheRecipe(recipe, ingredients))
                 .collect(Collectors.toList()));
 
+    }
+
+    public List<Ingredient> getIngredients(final Long recipeId){
+        return getTemporaryRecipeById(recipeId).getIngredients();
     }
 
     public Page<Recipe> findRecipes(final Integer time,
