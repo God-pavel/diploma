@@ -2,6 +2,7 @@ package com.studying.diploma.controller;
 
 import com.studying.diploma.model.Recipe;
 import com.studying.diploma.model.RecipeCategory;
+import com.studying.diploma.model.TemporaryRecipe;
 import com.studying.diploma.model.User;
 import com.studying.diploma.service.ProductService;
 import com.studying.diploma.service.RecipeService;
@@ -36,10 +37,10 @@ public class RecipeController {
     }
 
     @PostMapping("/findRecipe")
-    public String sendCriteria(RedirectAttributes ra,
-                               @RequestParam(value = "time", required = false) Integer time,
-                               @RequestParam(value = "category", required = false) String category,
-                               @RequestParam(value = "products", required = false) List<String> products) {
+    public String sendFoundResults(RedirectAttributes ra,
+                                   @RequestParam(value = "time", required = false) Integer time,
+                                   @RequestParam(value = "category", required = false) String category,
+                                   @RequestParam(value = "products", required = false) List<String> products) {
         Page<Recipe> result = recipeService.findRecipes(time, category, products);
         ra.addFlashAttribute("recipes", result);
         return "redirect:/main";
@@ -58,9 +59,46 @@ public class RecipeController {
                              @RequestParam(value = "rate") Integer rate,
                              RedirectAttributes ra) {
         boolean isRated = recipeService.rateRecipe(recipe, rate, user);
-        if(!isRated){
+        if (!isRated) {
             ra.addFlashAttribute("message", "error");
         }
         return "redirect:/rateRecipe/" + recipe.getId();
+    }
+
+    @GetMapping("/fastFindRecipe")
+    public String fastFindRecipePage(Model model) {
+        TemporaryRecipe recipe = recipeService.createEmptyRecipe();
+        model.addAttribute("recipe", recipe);
+        model.addAttribute("products", productService.getAllProducts());
+        return "fast_find_recipe";
+    }
+
+    @GetMapping("/fastFindRecipe/{recipeId}")
+    public String fastFindRecipePageWithIngredients(@PathVariable Long recipeId,
+                                                    Model model) {
+        TemporaryRecipe recipe = recipeService.getTemporaryRecipeById(recipeId);
+        model.addAttribute("recipe", recipe);
+        model.addAttribute("products", productService.getAllProducts());
+        return "fast_find_recipe";
+    }
+
+    @PostMapping("/fastFindRecipe/addIngredient/{recipeId}")
+    public String addByName(@PathVariable Long recipeId,
+                            @RequestParam("productName") String productName,
+                            @RequestParam("weight") Long weight) {
+
+        recipeService.addIngredientToRecipe(recipeId, productName, weight);
+
+
+        return "redirect:/fastFindRecipe/" + recipeId;
+    }
+
+    @PostMapping("/fastFindRecipe/{recipeId}")
+    public String send(@PathVariable Long recipeId,
+                       @RequestParam(value = "time", required = false) Integer time,
+                       RedirectAttributes ra){
+        Page<Recipe> result = recipeService.findRecipesByIngredientsAndTime(recipeId, time);
+        ra.addFlashAttribute("recipes", result);
+        return "redirect:/main";
     }
 }

@@ -4,6 +4,14 @@
 <#include "parts/security.ftl">
 <@c.page>
     <h3><@spring.message "page.recommendations"/></h3>
+
+    <div class="col-sm-2">
+        <form action="/recommendation/filterRecipes" method="post">
+            <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+            <button class="btn btn-primary" type="submit"><@spring.message "main.find.recipe"/></button>
+        </form>
+    </div>
+
     <@p.pager url page/>
 
     <div class="card-columns">

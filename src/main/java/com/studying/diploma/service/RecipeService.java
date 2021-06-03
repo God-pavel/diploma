@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log4j2
 @Service
@@ -94,10 +95,37 @@ public class RecipeService {
         temporaryRecipeRepository.save(temporaryRecipe);
     }
 
+    public Page<Recipe> findRecipesByIngredientsAndTime(final Long recipeId,
+                                                        final Integer time) {
+        final TemporaryRecipe temporaryRecipe = getTemporaryRecipeById(recipeId);
+        temporaryRecipeRepository.delete(temporaryRecipe);
+        final List<Ingredient> ingredients = temporaryRecipe.getIngredients();
+        return new PageImpl<>(recipeRepository.findAll().stream()
+                .filter(recipe -> time == null || recipe.getTime() <= time)
+                .filter(recipe -> doesEnoughIngredientsForTheRecipe(recipe, ingredients))
+                .collect(Collectors.toList()));
+
+    }
+
     public Page<Recipe> findRecipes(final Integer time,
                                     final String category,
                                     final List<String> products) {
-        return new PageImpl<>(recipeRepository.findAll().stream()
+        return filterRecipes(time, category, products, recipeRepository.findAll().stream());
+    }
+
+    public Page<Recipe> findRecommendedRecipes(final Integer time,
+                                               final String category,
+                                               final List<String> products,
+                                               final User user) {
+        return filterRecipes(time, category, products, getUserRecommendations(user).stream());
+    }
+
+
+    private Page<Recipe> filterRecipes(final Integer time,
+                                       final String category,
+                                       final List<String> products,
+                                       final Stream<Recipe> recipeStream) {
+        return new PageImpl<>(recipeStream
                 .filter(recipe -> time == null || recipe.getTime() <= time)
                 .filter(recipe -> category == null || recipe.getRecipeCategory().equals(RecipeCategory.valueOf(category)))
                 .filter(recipe -> products == null || recipe.getIngredients().stream().map(ingredient -> ingredient.getProduct().getName()).collect(Collectors.toList()).containsAll(products))
@@ -120,14 +148,15 @@ public class RecipeService {
         return true;
     }
 
-    public Page<Recipe> getUserRecommendations(final User user) {
-        return new PageImpl<>(userService.getSimilarUsers(user).stream()
+
+    public List<Recipe> getUserRecommendations(final User user) {
+        return userService.getSimilarUsers(user).stream()
                 .flatMap(similarUser -> similarUser.getMarks().stream())
                 .filter(mark -> mark.getMark() >= MIN_RECOMMENDATION_MARK)
                 .map(Mark::getRecipe)
                 .filter(recipe -> filterPreviouslyRatedRecipes(user, recipe))
                 .distinct()
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
     }
 
     private boolean filterPreviouslyRatedRecipes(User user, Recipe recipe) {
@@ -141,5 +170,18 @@ public class RecipeService {
         return ingredients.stream()
                 .map(ingredient -> ingredient.getProduct().getEnergy().multiply(BigDecimal.valueOf(ingredient.getWeight()).divide(BigDecimal.valueOf(100))))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private boolean doesEnoughIngredientsForTheRecipe(final Recipe recipe,
+                                                      final List<Ingredient> ingredients) {
+        return recipe.getIngredients().stream()
+                .allMatch(ingredient -> doesIngredientsContainIngredient(ingredients, ingredient));
+    }
+
+    private boolean doesIngredientsContainIngredient(final List<Ingredient> ingredients,
+                                                     final Ingredient ingredient) {
+        return ingredients.stream()
+                .anyMatch(ing -> ingredient.getProduct().equals(ing.getProduct()) &&
+                        ing.getWeight() >= ingredient.getWeight());
     }
 }

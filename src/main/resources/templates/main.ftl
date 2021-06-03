@@ -15,6 +15,12 @@
             </form>
         </div>
         <div class="col-sm-2">
+            <form action="/main/fastFindRecipe" method="post">
+                <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                <button class="btn btn-primary" type="submit"><@spring.message "main.fastFind"/></button>
+            </form>
+        </div>
+        <div class="col-sm-2">
             <#if name != "unknown">
                 <form action="/main/createRecipe" method="post">
                     <input type="hidden" name="_csrf" value="${_csrf.token}"/>

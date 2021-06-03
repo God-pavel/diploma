@@ -9,7 +9,7 @@
                 <#if message??>
                     <div class="alert alert-danger" role="alert">${message}</div>
                 </#if>
-                <form action="/findRecipe" method="post">
+                <form action="${path}/findRecipe" method="post">
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label"> <@spring.message "criteria.time"/></label>
                         <div class="col-sm-4">

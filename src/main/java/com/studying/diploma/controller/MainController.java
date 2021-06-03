@@ -43,21 +43,16 @@ public class MainController {
         return "redirect:/findRecipe";
     }
 
+    @PostMapping("/fastFindRecipe")
+    public String fastFindRecipe() {
+        return "redirect:/fastFindRecipe";
+    }
+
     @PostMapping("/createRecipe")
     public String createRecipe() {
         return "redirect:/createRecipe";
     }
 
-//    @PostMapping("/deleteCheck")
-//    public String deleteCheck(Long checkId, RedirectAttributes ra) {
-//        try {
-//            checkService.deleteCheck(checkId);
-//        } catch (CheckCantBeDeleted e) {
-//            log.warn(e.getMessage());
-//            ra.addFlashAttribute("message", e.getMessage());
-//        }
-//        return "redirect:/main";
-//    }
     private boolean isRecipesFiltered(Object recipes){
         try{
             PageImpl page = (PageImpl) recipes;
