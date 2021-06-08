@@ -21,6 +21,17 @@
             </form>
         </div>
         <div class="col-sm-2">
+            <form action="/main/sort" method="get">
+                <div>
+                    <label><input type="radio" name="sort" required value="rate">rate</label>
+                </div>
+                <div>
+                    <label><input type="radio" name="sort" required value="time">time</label>
+                </div>
+                <button class="btn btn-primary" type="submit"><@spring.message "main.sort"/></button>
+            </form>
+        </div>
+        <div class="col-sm-2">
             <#if name != "unknown">
                 <form action="/main/createRecipe" method="post">
                     <input type="hidden" name="_csrf" value="${_csrf.token}"/>
@@ -46,9 +57,11 @@
                 </#list>
 
                 <div class="card-footer" style="background-color: whitesmoke;">
-                    <p><b style="float: left;"><@spring.message "main.total"/>: ${recipe.totalEnergy} <@spring.message "recipe.cal"/></b></p>
+                    <p><b style="float: left;"><@spring.message "main.total"/>
+                            : ${recipe.totalEnergy} <@spring.message "recipe.cal"/></b></p>
                     <br/>
-                    <a style="background-color: transparent;" href="/rateRecipe/${recipe.id}"><@spring.message "main.more"/></a>
+                    <a style="background-color: transparent;"
+                       href="/rateRecipe/${recipe.id}"><@spring.message "main.more"/></a>
                 </div>
             </div>
         </#list>

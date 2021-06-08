@@ -29,12 +29,6 @@ public class ProductService {
         return productRepository.findByName(name);
     }
 
-
-    public Optional<Product> getProductById(long id) {
-        return productRepository.findById(id);
-    }
-
-
     public boolean saveProduct(ProductDTO productdto) {
         final Optional<Product> productFromDb = getProductByName(productdto.getName());
         if (productFromDb.isPresent()) {
