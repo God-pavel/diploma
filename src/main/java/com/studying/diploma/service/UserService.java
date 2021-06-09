@@ -184,25 +184,6 @@ public class UserService implements UserDetailsService {
                 .findFirst().orElse(0);
     }
 
-//    //Todo optimize
-//    public boolean areUsersSimilar(final User user1,
-//                                   final User user2) {
-//        final Map<Mark, Mark> commonMarks = getCommonMarks(getUserById(user1.getId()).getMarks(), getUserById(user2.getId()).getMarks());
-//        if (commonMarks.size() < MIN_COMMON_MARKS || user1.getId().equals(user2.getId())) {
-//            return false;
-//        }
-//        return commonMarks.entrySet().stream()
-//                .mapToInt(entry -> Math.abs(entry.getKey().getMark() - entry.getValue().getMark()))
-//                .average().orElse(10d) <= MAX_AVG_MARKS_DIFFERENCE;
-//    }
-
-//    public Map<Mark, Mark> getCommonMarks(final List<Mark> marks1,
-//                                          final List<Mark> marks2) {
-//        return marks1.stream()
-//                .filter(mark1 -> marks2.stream().anyMatch(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())))
-//                .collect(Collectors.toMap(mark1 -> mark1, mark1 -> (Mark) marks2.stream().filter(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())).findFirst().get()));
-//    }
-
     @PostConstruct
     public void add() {
         if (userRepository.findByUsername("admin").isEmpty()) {
