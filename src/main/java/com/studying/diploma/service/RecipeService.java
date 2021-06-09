@@ -21,9 +21,9 @@ import java.util.stream.Stream;
 @Service
 public class RecipeService {
 
-    public static final Integer MIN_COMMON_MARKS = 5;
-    public static final Integer MAX_AVG_MARKS_DIFFERENCE = 2;
-    public static final Integer SIMILAR_USERS = 3;
+//    public static final Integer MIN_COMMON_MARKS = 5;
+//    public static final Integer MAX_AVG_MARKS_DIFFERENCE = 2;
+    public static final Integer SIMILAR_USERS = 5;
     public static final Integer MIN_RECOMMENDATION_MARK = 9;
 
 

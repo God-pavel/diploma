@@ -2,8 +2,11 @@ package com.studying.diploma.service;
 
 import com.studying.diploma.dto.UserDTO;
 import com.studying.diploma.model.Mark;
+import com.studying.diploma.model.Recipe;
 import com.studying.diploma.model.Role;
 import com.studying.diploma.model.User;
+import com.studying.diploma.repository.MarkRepository;
+import com.studying.diploma.repository.RecipeRepository;
 import com.studying.diploma.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,9 +21,10 @@ import javax.annotation.PostConstruct;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.studying.diploma.config.MvcConfig.PHOTO_FOLDER;
-import static com.studying.diploma.service.RecipeService.*;
+import static com.studying.diploma.service.RecipeService.SIMILAR_USERS;
 
 @Log4j2
 @Service
@@ -28,13 +32,15 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FileUploadUtil fileUploadUtil;
+    private final RecipeRepository recipeRepository;
+    private final MarkRepository markRepository;
     private final AmazonClient amazonClient;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, FileUploadUtil fileUploadUtil, AmazonClient amazonClient) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RecipeRepository recipeRepository, MarkRepository markRepository, AmazonClient amazonClient) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.fileUploadUtil = fileUploadUtil;
+        this.recipeRepository = recipeRepository;
+        this.markRepository = markRepository;
         this.amazonClient = amazonClient;
     }
 
@@ -103,8 +109,7 @@ public class UserService implements UserDetailsService {
             user.setPhoto(fileName);
             String uploadDir = PHOTO_FOLDER + user.getId();
             try {
-                amazonClient.uploadFile(multipartFile, uploadDir +"/" + fileName);
-//                fileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+                amazonClient.uploadFile(multipartFile, uploadDir + "/" + fileName);
             } catch (Exception e) {
                 log.warn("File " + fileName + " can't be saved!");
             }
@@ -123,31 +128,80 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id).get();
     }
 
-    public Set<User> getSimilarUsers(final User user) {
-        return userRepository.findAll().stream()
-                .filter(candidate -> areUsersSimilar(user, candidate))
+    public List<User> getSimilarUsers(final User user) {
+        return createCosDifMap(user).entrySet().stream()
+                .sorted(Map.Entry.<User, Double> comparingByValue().reversed())
+                .map(Map.Entry::getKey)
                 .limit(SIMILAR_USERS)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
-    //Todo optimize
-    public boolean areUsersSimilar(final User user1,
-                                   final User user2) {
-        final Map<Mark, Mark> commonMarks = getCommonMarks(getUserById(user1.getId()).getMarks(), getUserById(user2.getId()).getMarks());
-        if (commonMarks.size() < MIN_COMMON_MARKS || user1.getId().equals(user2.getId())) {
-            return false;
+    public Map<User, Double> createCosDifMap(User object) {
+        return userRepository.findAll().stream()
+                .filter(user -> !user.getId().equals(object.getId()))
+                .collect(Collectors.toMap(user -> user, user -> calcCosDif(object, user)));
+    }
+
+    private double calcCosDif(User user1, User user2) {
+        List<Recipe> allRecipes = recipeRepository.findAll();
+        List<Integer> user1Marks = new ArrayList<>();
+        List<Integer> user2Marks = new ArrayList<>();
+
+        allRecipes.forEach(recipe -> {
+            user1Marks.add(getRecipeRateByUser(user1, recipe));
+            user2Marks.add(getRecipeRateByUser(user2, recipe));
+        });
+
+        return calcResult(user1Marks, user2Marks);
+    }
+
+    private double calcResult(List<Integer> user1Marks, List<Integer> user2Marks) {
+        final double divider = calcLength(user1Marks) * calcLength(user2Marks);
+        if (divider == 0){
+            return 0;
         }
-        return commonMarks.entrySet().stream()
-                .mapToInt(entry -> Math.abs(entry.getKey().getMark() - entry.getValue().getMark()))
-                .average().orElse(10d) <= MAX_AVG_MARKS_DIFFERENCE;
+        final double divided = calcSum(user1Marks, user2Marks);
+        return divided / divider;
     }
 
-    public Map<Mark, Mark> getCommonMarks(final List<Mark> marks1,
-                                          final List<Mark> marks2) {
-        return marks1.stream()
-                .filter(mark1 -> marks2.stream().anyMatch(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())))
-                .collect(Collectors.toMap(mark1 -> mark1, mark1 -> (Mark) marks2.stream().filter(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())).findFirst().get()));
+    private Double calcSum(final List<Integer> marks1,
+                        final List<Integer> marks2) {
+        return IntStream.range(0, marks1.size())
+                .mapToDouble(i -> marks1.get(i) * marks2.get(i))
+                .sum();
     }
+
+    private Double calcLength(final List<Integer> marks) {
+        return Math.sqrt(marks.stream()
+                .mapToDouble(mark -> mark * mark)
+                .sum());
+    }
+
+    private Integer getRecipeRateByUser(User user, Recipe recipe) {
+        return recipe.getMarks().stream()
+                .filter(mark -> mark.getUser().getId().equals(user.getId()))
+                .map(Mark::getMark)
+                .findFirst().orElse(0);
+    }
+
+//    //Todo optimize
+//    public boolean areUsersSimilar(final User user1,
+//                                   final User user2) {
+//        final Map<Mark, Mark> commonMarks = getCommonMarks(getUserById(user1.getId()).getMarks(), getUserById(user2.getId()).getMarks());
+//        if (commonMarks.size() < MIN_COMMON_MARKS || user1.getId().equals(user2.getId())) {
+//            return false;
+//        }
+//        return commonMarks.entrySet().stream()
+//                .mapToInt(entry -> Math.abs(entry.getKey().getMark() - entry.getValue().getMark()))
+//                .average().orElse(10d) <= MAX_AVG_MARKS_DIFFERENCE;
+//    }
+
+//    public Map<Mark, Mark> getCommonMarks(final List<Mark> marks1,
+//                                          final List<Mark> marks2) {
+//        return marks1.stream()
+//                .filter(mark1 -> marks2.stream().anyMatch(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())))
+//                .collect(Collectors.toMap(mark1 -> mark1, mark1 -> (Mark) marks2.stream().filter(mark2 -> mark2.getRecipe().getId().equals(mark1.getRecipe().getId())).findFirst().get()));
+//    }
 
     @PostConstruct
     public void add() {
