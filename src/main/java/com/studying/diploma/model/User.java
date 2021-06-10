@@ -3,14 +3,13 @@ package com.studying.diploma.model;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static com.studying.diploma.config.MvcConfig.PHOTO_FOLDER;
+import static com.studying.diploma.service.AmazonClient.USER_PHOTO_FOLDER;
 
 @Data
 @AllArgsConstructor
@@ -44,7 +43,7 @@ public class User implements UserDetails {
     @Transient
     public String getPhotosImagePath() {
         if (photo == null || id == null) return null;
-        return "https://diploma-files.s3.amazonaws.com/"+ PHOTO_FOLDER + id + "/" + photo;
+        return "https://diploma-files.s3.amazonaws.com/" + USER_PHOTO_FOLDER + id + "/" + photo;
     }
 
     public boolean isAdmin() {

@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.studying.diploma.config.MvcConfig.PHOTO_FOLDER;
+import static com.studying.diploma.service.AmazonClient.USER_PHOTO_FOLDER;
 import static com.studying.diploma.service.RecipeService.SIMILAR_USERS;
 
 @Log4j2
@@ -105,9 +105,9 @@ public class UserService implements UserDetailsService {
         }
 
         if (multipartFile.getOriginalFilename() != null && !StringUtils.cleanPath(multipartFile.getOriginalFilename()).equals("")) {
-            String fileName = generateFileName(multipartFile);
+            String fileName = amazonClient.generateFileName(multipartFile);
             user.setPhoto(fileName);
-            String uploadDir = PHOTO_FOLDER + user.getId();
+            String uploadDir = USER_PHOTO_FOLDER + user.getId();
             try {
                 amazonClient.uploadFile(multipartFile, uploadDir + "/" + fileName);
             } catch (Exception e) {
@@ -130,7 +130,7 @@ public class UserService implements UserDetailsService {
 
     public List<User> getSimilarUsers(final User user) {
         return createCosDifMap(user).entrySet().stream()
-                .sorted(Map.Entry.<User, Double> comparingByValue().reversed())
+                .sorted(Map.Entry.<User, Double>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .limit(SIMILAR_USERS)
                 .collect(Collectors.toList());
@@ -157,7 +157,7 @@ public class UserService implements UserDetailsService {
 
     private double calcResult(List<Integer> user1Marks, List<Integer> user2Marks) {
         final double divider = calcLength(user1Marks) * calcLength(user2Marks);
-        if (divider == 0){
+        if (divider == 0) {
             return 0;
         }
         final double divided = calcSum(user1Marks, user2Marks);
@@ -165,7 +165,7 @@ public class UserService implements UserDetailsService {
     }
 
     private Double calcSum(final List<Integer> marks1,
-                        final List<Integer> marks2) {
+                           final List<Integer> marks2) {
         return IntStream.range(0, marks1.size())
                 .mapToDouble(i -> marks1.get(i) * marks2.get(i))
                 .sum();
@@ -198,9 +198,5 @@ public class UserService implements UserDetailsService {
             userRepository.save(user);
         }
 
-    }
-
-    private String generateFileName(MultipartFile multiPart) {
-        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
     }
 }

@@ -36,7 +36,7 @@
         </form>
     </div>
 
-    <form action="/createRecipe/${recipe.id}" method="post">
+    <form action="/createRecipe/${recipe.id}" enctype="multipart/form-data" method="post">
         <div class="form-group row">
             <label class="col-sm-2 col-form-label"><@spring.message "recipe.name"/> : </label>
             <div class="col-sm-4">
@@ -70,6 +70,14 @@
                     </div>
                 </#list>
             </div>
+        </div>
+        <div>
+            <label><@spring.message "users.photo"/>: </label>
+            <input type="file" name="image" accept="image/png, image/jpeg"/>
+        </div>
+        <div>
+            <label><@spring.message "recipe.video"/>: </label>
+            <input type="file" name="video" accept="video/mp4"/>
         </div>
         <input type="hidden" name="recipeId" value="${recipe.id}"/>
         <input type="hidden" name="_csrf" value="${_csrf.token}"/>

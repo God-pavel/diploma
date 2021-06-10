@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Log4j2
@@ -56,8 +57,10 @@ public class CreateRecipeController {
                              @RequestParam("name") String name,
                              @RequestParam("text") String text,
                              @RequestParam("category") String category,
+                             @RequestParam("image") MultipartFile photo,
+                             @RequestParam("video") MultipartFile video,
                              RedirectAttributes ra) {
-        if (!recipeService.saveRecipe(recipeId, time, name, text, category, user)) {
+        if (!recipeService.saveRecipe(recipeId, time, name, text, category, user, photo, video)) {
             ra.addFlashAttribute("error", "error");
             return "redirect:/createRecipe/" + recipeId;
         }

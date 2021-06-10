@@ -5,11 +5,9 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static com.studying.diploma.service.AmazonClient.RECIPE_PHOTO_FOLDER;
+import static com.studying.diploma.service.AmazonClient.RECIPE_VIDEO_FOLDER;
 
 
 @Data
@@ -53,7 +51,25 @@ public class Recipe {
     @Column(name = "total_energy", nullable = false)
     private BigDecimal totalEnergy;
 
-    public void calculateRate(){
+    @Column(name = "photo")
+    private String photo;
+
+    @Column(name = "video")
+    private String video;
+
+    @Transient
+    public String getPhotosImagePath() {
+        if (photo == null || id == null) return null;
+        return "https://diploma-files.s3.amazonaws.com/" + RECIPE_PHOTO_FOLDER + photo;
+    }
+
+    @Transient
+    public String getVideoPath() {
+        if (photo == null || id == null) return null;
+        return "https://diploma-files.s3.amazonaws.com/" + RECIPE_VIDEO_FOLDER + video;
+    }
+
+    public void calculateRate() {
         rate = marks.stream()
                 .mapToInt(Mark::getMark)
                 .average().orElse(0d);

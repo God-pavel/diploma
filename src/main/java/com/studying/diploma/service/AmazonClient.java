@@ -14,11 +14,16 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 @Service
 public class AmazonClient {
 
     private AmazonS3 s3client;
+
+    public static final String USER_PHOTO_FOLDER = "user-photos/";
+    public static final String RECIPE_PHOTO_FOLDER = "recipe-photos/";
+    public static final String RECIPE_VIDEO_FOLDER = "recipe-videos/";
 
     @Value("${amazonProperties.endpointUrl}")
     private String endpointUrl;
@@ -57,5 +62,9 @@ public class AmazonClient {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public String generateFileName(MultipartFile multiPart) {
+        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
     }
 }

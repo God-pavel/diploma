@@ -7,6 +7,15 @@
     <#if message?? && message == "error">
         <div class="alert alert-danger" role="alert"><@spring.message "recipe.error.rate"/></div>
     </#if>
+    <#if recipe.getPhotosImagePath()??>
+        <img width="200" height="300" src="${recipe.getPhotosImagePath()}"/>
+    </#if>
+    <#if recipe.getVideoPath()??>
+        <video width="320" height="240" controls>
+            <source src="${recipe.getVideoPath()}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </#if>
     <p><@spring.message "recipe.time"/> : ${recipe.time}</p>
     <p><@spring.message "main.category"/> : ${recipe.recipeCategory}</p>
     <p><@spring.message "main.creator"/> : ${recipe.creator.username}</p>

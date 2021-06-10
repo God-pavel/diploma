@@ -9,23 +9,24 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.studying.diploma.service.AmazonClient.RECIPE_PHOTO_FOLDER;
+import static com.studying.diploma.service.AmazonClient.RECIPE_VIDEO_FOLDER;
+
 @Log4j2
 @Service
 public class RecipeService {
 
-//    public static final Integer MIN_COMMON_MARKS = 5;
-//    public static final Integer MAX_AVG_MARKS_DIFFERENCE = 2;
     public static final Integer SIMILAR_USERS = 5;
     public static final Integer MIN_RECOMMENDATION_MARK = 9;
-
 
     private final ProductService productService;
     private final UserService userService;
@@ -33,25 +34,21 @@ public class RecipeService {
     private final TemporaryRecipeRepository temporaryRecipeRepository;
     private final IngredientRepository ingredientRepository;
     private final MarkRepository markRepository;
+    private final AmazonClient amazonClient;
 
-
-    public RecipeService(RecipeRepository recipeRepository, TemporaryRecipeRepository temporaryRecipeRepository, ProductService productService, UserService userService, IngredientRepository ingredientRepository, MarkRepository markRepository) {
+    public RecipeService(RecipeRepository recipeRepository, TemporaryRecipeRepository temporaryRecipeRepository, ProductService productService, UserService userService, IngredientRepository ingredientRepository, MarkRepository markRepository, AmazonClient amazonClient) {
         this.recipeRepository = recipeRepository;
         this.temporaryRecipeRepository = temporaryRecipeRepository;
         this.productService = productService;
         this.userService = userService;
         this.ingredientRepository = ingredientRepository;
         this.markRepository = markRepository;
+        this.amazonClient = amazonClient;
     }
 
     public Page<Recipe> getAllRecipes(Pageable pageable) {
 
         return recipeRepository.findAll(pageable);
-    }
-
-    public List<Recipe> getAllRecipes(Sort sort) {
-
-        return recipeRepository.findAll(sort);
     }
 
     public TemporaryRecipe getTemporaryRecipeById(long id) {
@@ -70,13 +67,16 @@ public class RecipeService {
                               final String name,
                               final String text,
                               final String category,
-                              final User user) {
+                              final User user,
+                              final MultipartFile photo,
+                              final MultipartFile video) {
 
         final TemporaryRecipe temporaryRecipe = getTemporaryRecipeById(recipeId);
         if (temporaryRecipe.getIngredients().isEmpty()) {
             return false;
         }
         temporaryRecipeRepository.delete(temporaryRecipe);
+
         final Recipe recipe = Recipe.builder()
                 .rate(0d)
                 .text(text)
@@ -87,8 +87,29 @@ public class RecipeService {
                 .time(time)
                 .totalEnergy(calculateRecipeEnergy(temporaryRecipe.getIngredients()))
                 .build();
+
+        if (photo.getOriginalFilename() != null && !StringUtils.cleanPath(photo.getOriginalFilename()).equals("")) {
+            String fileName = amazonClient.generateFileName(photo);
+            recipe.setPhoto(fileName);
+            try {
+                amazonClient.uploadFile(photo, RECIPE_PHOTO_FOLDER + fileName);
+            } catch (Exception e) {
+                log.warn("File " + fileName + " can't be saved!");
+            }
+        }
+
+        if (video.getOriginalFilename() != null && !StringUtils.cleanPath(video.getOriginalFilename()).equals("")) {
+            String fileName = amazonClient.generateFileName(video);
+            recipe.setVideo(fileName);
+            try {
+                amazonClient.uploadFile(video, RECIPE_VIDEO_FOLDER + fileName);
+            } catch (Exception e) {
+                log.warn("File " + fileName + " can't be saved!");
+            }
+        }
+
         recipeRepository.save(recipe);
-        log.info("Check was saved. Check id: " + recipe.getId());
+        log.info("Recipe was saved. Recipe id: " + recipe.getId());
         return true;
     }
 
@@ -118,7 +139,7 @@ public class RecipeService {
 
     }
 
-    public List<Ingredient> getIngredients(final Long recipeId){
+    public List<Ingredient> getIngredients(final Long recipeId) {
         return getTemporaryRecipeById(recipeId).getIngredients();
     }
 
