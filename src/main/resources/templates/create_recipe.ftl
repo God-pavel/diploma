@@ -3,7 +3,7 @@
 <#include "parts/security.ftl">
 
 <@c.page>
-    <h3><@spring.message "page.recipe"/></h3>
+    <h3 style="color: #ffcd30;"><@spring.message "page.recipe"/></h3>
     <#if error??>
         <div class="alert alert-danger" role="alert"><@spring.message "recipe.error.noing"/></div>
     </#if>
@@ -11,12 +11,12 @@
     <div>
         <form action="/createRecipe/addIngredient/${recipe.id}" method="post">
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label"><@spring.message "recipe.productName"/> : </label>
+                <label class="col-sm-2 col-form-label" style="color: #ffcd30;"><@spring.message "recipe.productName"/> : </label>
                 <div class="col-sm-2">
-                    <select name="productName">
+                    <select style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" name="productName">
                         <#list products as product >
                             <div class="col-sm-5">
-                                <option value="${product.name}">${product.name}</option>
+                                <option style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" value="${product.name}">${product.name}</option>
                             </div>
                         </#list>
                     </select>
@@ -24,63 +24,63 @@
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label"><@spring.message "recipe.weight"/> : </label>
+                <label class="col-sm-2 col-form-label" style="color: #ffcd30;"><@spring.message "recipe.weight"/> : </label>
                 <div class="col-sm-3">
-                    <input type="number" step="any" class="form-control" name="weight" required/>
+                    <input type="number" style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" step="any" class="form-control" name="weight" required/>
                 </div>
             </div>
             <input type="hidden" name="recipeId" value="${recipe.id}"/>
             <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-            <button class="btn btn-outline-secondary btn-sm"
+            <button class="btn btn btn-outline-warning btn-sm"
                     type="submit"><@spring.message "recipe.add"/></button>
         </form>
     </div>
 
     <form action="/createRecipe/${recipe.id}" enctype="multipart/form-data" method="post">
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label"><@spring.message "recipe.name"/> : </label>
+            <label class="col-sm-2 col-form-label" style="color: #ffcd30;"><@spring.message "recipe.name"/> : </label>
             <div class="col-sm-4">
-                <input type="text" class="form-control" name="name" required/>
+                <input type="text" style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" class="form-control" name="name" required/>
             </div>
         </div>
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label"><@spring.message "recipe.time"/> : </label>
+            <label class="col-sm-2 col-form-label" style="color: #ffcd30;"><@spring.message "recipe.time"/> : </label>
             <div class="col-sm-4">
-                <input type="number" class="form-control" name="time" required/>
+                <input type="number" style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" class="form-control" name="time" required/>
             </div>
         </div>
         <#if recipe.ingredients??>
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label"> <@spring.message "recipe.ingredients"/> : </label>
+                <label class="col-sm-2 col-form-label" style="color: #ffcd30;"> <@spring.message "recipe.ingredients"/> : </label>
                 <div class="col-sm-4">
                     <#list recipe.ingredients as ingredient>
-                        <p>${ingredient.product.name} ${ingredient.weight} <@spring.message "main.gram"/></p>
+                        <p style="color: #ffcd30;">${ingredient.product.name} ${ingredient.weight} <@spring.message "main.gram"/></p>
                     </#list>
                 </div>
             </div>
         </#if>
-        <label class="col-sm-2 col-form-label"><@spring.message "recipe.text"/> : </label>
-        <p><textarea name="text" rows="4" cols="70" required> </textarea></p>
+        <label class="col-sm-2 col-form-label" style="color: #ffcd30;"><@spring.message "recipe.text"/> : </label>
+        <p><textarea style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" name="text" rows="4" cols="70" required> </textarea></p>
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label"> <@spring.message "criteria.category"/></label>
+            <label class="col-sm-2 col-form-label" style="color: #ffcd30;"> <@spring.message "criteria.category"/></label>
             <div class="col-sm-4">
                 <#list categories as category>
                     <div>
-                        <label><input type="radio" name="category" required value=${category}>${category}</label>
+                        <label style="color: #ffcd30;"><input type="radio" class="form-check-input" name="category" required value=${category}>${category}</label>
                     </div>
                 </#list>
             </div>
         </div>
         <div>
-            <label><@spring.message "users.photo"/>: </label>
-            <input type="file" name="image" accept="image/png, image/jpeg"/>
+            <label style="color: #ffcd30;"><@spring.message "users.photo"/>: </label>
+            <input type="file" style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" name="image" accept="image/png, image/jpeg"/>
         </div>
         <div>
-            <label><@spring.message "recipe.video"/>: </label>
-            <input type="file" name="video" accept="video/mp4"/>
+            <label style="color: #ffcd30;"><@spring.message "recipe.video"/>: </label>
+            <input type="file" style="color: #ffcd30; background-color: #393d3f; border-color: #ffcd30;" name="video" accept="video/mp4"/>
         </div>
         <input type="hidden" name="recipeId" value="${recipe.id}"/>
         <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-        <button class="btn btn-primary m-3" type="submit"><@spring.message "recipe.close"/></button>
+        <button class="btn btn btn-outline-warning" type="submit"><@spring.message "recipe.close"/></button>
     </form>
 </@c.page>

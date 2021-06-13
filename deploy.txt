@@ -1,0 +1,4 @@
+scp -i "~/Downloads/diploma.pem" target/diploma-0.0.1-SNAPSHOT.jar ec2-user@ec2-3-8-237-6.eu-west-2.compute.amazonaws.com:/home/ec2-user
+diploma-0.0.1-SNAPSHOT.jar
+
+ssh -i "~/Downloads/diploma.pem" ec2-user@ec2-3-8-237-6.eu-west-2.compute.amazonaws.com

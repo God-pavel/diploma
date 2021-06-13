@@ -65,7 +65,7 @@ public class Recipe {
 
     @Transient
     public String getVideoPath() {
-        if (photo == null || id == null) return null;
+        if (video == null || id == null) return null;
         return "https://diploma-files.s3.amazonaws.com/" + RECIPE_VIDEO_FOLDER + video;
     }
 

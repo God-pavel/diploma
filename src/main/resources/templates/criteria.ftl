@@ -5,40 +5,40 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <table class="table table-striped">
-                <h3><@spring.message "page.criteria"/></h3>
+                <h3 style="color: #ffcd30;"><@spring.message "page.criteria"/></h3>
                 <#if message??>
                     <div class="alert alert-danger" role="alert">${message}</div>
                 </#if>
                 <form action="${path}/findRecipe" method="post">
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label"> <@spring.message "criteria.time"/></label>
+                        <label class="col-sm-2 col-form-label" style="color: #ffcd30;"> <@spring.message "criteria.time"/></label>
                         <div class="col-sm-4">
-                            <input type="number" class="form-control" name="time"/>
+                            <input type="number" style="color: #ffcd30; background-color: #393d3f; border-color:  #ffcd30;" class="form-control" name="time"/>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label"> <@spring.message "criteria.category"/>: </label>
+                        <label class="col-sm-2 col-form-label" style="color: #ffcd30;"> <@spring.message "criteria.category"/>: </label>
                         <div class="col-sm-4">
                             <#list categories as category>
                                 <div>
-                                    <label><input type="radio" name="category" value=${category}> ${category}
+                                    <label style="color: #ffcd30;"><input type="radio" class="form-check-input" name="category" value=${category}> ${category}
                                     </label>
                                 </div>
                             </#list>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label"> <@spring.message "criteria.products"/></label>
+                        <label class="col-sm-2 col-form-label" style="color: #ffcd30;"> <@spring.message "criteria.products"/></label>
                         <div class="col-sm-4">
-                            <select name="products" multiple>
+                            <select name="products" multiple style="color: #ffcd30; background-color: #393d3f; border-color:  #ffcd30;">
                                 <#list products as product >
-                                    <option value="${product.name}">${product.name}</option>
+                                    <option style="color: #ffcd30; background-color: #393d3f; border-color:  #ffcd30;" value="${product.name}">${product.name}</option>
                                 </#list>
                             </select>
                         </div>
                     </div>
                     <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-                    <button class="btn btn-primary" type="submit"><@spring.message "criteria.filter"/></button>
+                    <button class="btn btn btn-outline-warning" type="submit"><@spring.message "criteria.filter"/></button>
                 </form>
             </table>
         </div>
