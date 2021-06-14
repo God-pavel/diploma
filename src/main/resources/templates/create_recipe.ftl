@@ -7,6 +7,9 @@
     <#if error??>
         <div class="alert alert-danger" role="alert"><@spring.message "recipe.error.noing"/></div>
     </#if>
+    <#if message?? && message?has_content>
+        <div class="alert alert-danger" role="alert">${message}</div>
+    </#if>
 
     <div>
         <form action="/createRecipe/addIngredient/${recipe.id}" method="post">

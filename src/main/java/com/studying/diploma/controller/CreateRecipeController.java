@@ -5,8 +5,10 @@ import com.studying.diploma.model.TemporaryRecipe;
 import com.studying.diploma.model.User;
 import com.studying.diploma.service.ProductService;
 import com.studying.diploma.service.RecipeService;
+import com.studying.diploma.validator.IngredientValidator;
+import com.studying.diploma.validator.RecipeValidator;
+import com.studying.diploma.validator.Result;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,11 +23,14 @@ public class CreateRecipeController {
 
     private final RecipeService recipeService;
     private final ProductService productService;
+    private final RecipeValidator recipeValidator;
+    private final IngredientValidator ingredientValidator;
 
-    public CreateRecipeController(RecipeService recipeService, ProductService productService) {
+    public CreateRecipeController(RecipeService recipeService, ProductService productService, RecipeValidator recipeValidator, IngredientValidator ingredientValidator) {
         this.recipeService = recipeService;
-
         this.productService = productService;
+        this.recipeValidator = recipeValidator;
+        this.ingredientValidator = ingredientValidator;
     }
 
     @GetMapping
@@ -60,6 +65,12 @@ public class CreateRecipeController {
                              @RequestParam("image") MultipartFile photo,
                              @RequestParam("video") MultipartFile video,
                              RedirectAttributes ra) {
+        Result result = recipeValidator.validate(time, name);
+        if (!result.isValid()) {
+            ra.addFlashAttribute("message", result.getMessage());
+            log.warn(result.getMessage());
+            return "redirect:/createRecipe/" + recipeId;
+        }
         if (!recipeService.saveRecipe(recipeId, time, name, text, category, user, photo, video)) {
             ra.addFlashAttribute("error", "error");
             return "redirect:/createRecipe/" + recipeId;
@@ -70,8 +81,14 @@ public class CreateRecipeController {
     @PostMapping("/addIngredient/{recipeId}")
     public String addByName(@PathVariable Long recipeId,
                             @RequestParam("productName") String productName,
-                            @RequestParam("weight") Long weight) {
-
+                            @RequestParam("weight") Long weight,
+                            RedirectAttributes ra) {
+        Result result = ingredientValidator.validate(weight);
+        if (!result.isValid()) {
+            ra.addFlashAttribute("message", result.getMessage());
+            log.warn(result.getMessage());
+            return "redirect:/createRecipe/" + recipeId;
+        }
         recipeService.addIngredientToRecipe(recipeId, productName, weight);
 
 
