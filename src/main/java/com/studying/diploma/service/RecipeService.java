@@ -25,7 +25,7 @@ import static com.studying.diploma.service.AmazonClient.RECIPE_VIDEO_FOLDER;
 @Service
 public class RecipeService {
 
-    public static final Integer SIMILAR_USERS = 5;
+    public static final Integer SIMILAR_USERS = 2;
     public static final Integer MIN_RECOMMENDATION_MARK = 9;
 
     private final ProductService productService;

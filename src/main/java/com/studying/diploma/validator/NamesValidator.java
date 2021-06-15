@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 
 public class NamesValidator implements Validator<String> {
-    private String regex = "^[a-zA-Zа-яА-Я ]{3,30}$";
+    private String regex = "^[a-zA-Zа-яА-Я і]{3,30}$";
     private String message = "Invalid name";
 
     @Override
